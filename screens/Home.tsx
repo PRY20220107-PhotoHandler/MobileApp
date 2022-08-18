@@ -61,7 +61,7 @@ export default function Home() {
       setMessage("Debe subir una imagen para poder validarla");
       return;
     }
-    const fileName = image.split('/').pop();
+    /*const fileName = image.split('/').pop();
     const fileType = fileName.split('.').pop();
     var formdata = new FormData();
     formdata.append("image", {uri:image,name:fileName,type:`image/${fileType}`});
@@ -71,11 +71,16 @@ export default function Home() {
       .then(result => checkValidateResults(result, false))
       .catch(error => checkValidateResults(error, true));
     setModalVisible(true);
-    setLoading(true);
+    setLoading(true);*/
+    console.log(image);
+    setStep(2)
   }
 
   const initProcess = async() => {
-    if (text == "") {
+    setStep(3);
+    setOriginal("https://www.clara.es/medio/2021/09/23/corte-de-pelo-hombre_b24e8652_1280x1927.jpg");
+    setEdited("https://www.clara.es/medio/2021/09/23/corte-de-pelo-hombre_b24e8652_1280x1927.jpg");
+    /*if (text == "") {
       setModalVisible(true); setLoading(false);
       setMessage("Debe ingresar un texto para poder realizar la edición");
       return;
@@ -96,7 +101,7 @@ export default function Home() {
       editImage(response.data.data.translations[0].translatedText); 
     }).catch(function (error) {
       checkEditResults(error, true)
-    });
+    });*/
   }
 
   const editImage = async(actualText: string) => {
