@@ -4,8 +4,11 @@ import { Text, View } from '../components/Themed';
 import { Modal, Pressable, Image, TextInput } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { AntDesign } from '@expo/vector-icons'; 
-import axios from "axios"; 
+import axios from 'axios'; 
 import * as Linking from 'expo-linking';
+
+import { deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore';
+import {db} from '../core/config';
 
 export default function Home() {
   const [image, setImage] = useState("");
@@ -16,6 +19,50 @@ export default function Home() {
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+
+  const [kword, setKword] = useState("");
+
+  // Firestore Database
+  const myDoc = doc(db, "MyCollection", "MyDocument")
+
+  const Create = (value, merge:boolean) => {
+    // MARK: Creating New Doc in Firebase
+    // Before that enable Firebase in Firebase Console
+    const myDoc = doc(db, "PalabrasClave", "UsuarioXX")
+
+      getDoc(myDoc)
+      // Handling Promises
+        .then((snapshot) => {
+          // MARK: Success
+          console.log(snapshot.exists());
+          
+          if (snapshot.exists()) {
+            setKword(snapshot.data().words);
+          } else {
+            setKword(text)
+          }
+
+          setText(kword+text);
+          const docData = {
+            "words": text
+          }
+          console.log(text)
+          setDoc(myDoc, docData)
+            // Handling Promises
+            .then(() => {
+              // MARK: Success
+              alert("Saved Succesfully!")
+            })
+            .catch((error) => {
+              // MARK: Failure
+              alert(error.message)
+            })
+        })
+        
+      
+      //var keywords:string  = value;
+      
+  };
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
@@ -171,9 +218,9 @@ export default function Home() {
         <View style={styles.editButtonWrapper}>
           <Pressable style={styles.finalButton} onPress={() => shareImage()}><Text style={styles.buttonText}>Guardar imagen</Text></Pressable>
           <Pressable style={styles.finalButton} onPress={() => shareImage()}><Text style={styles.buttonText}>Compartir</Text></Pressable>
-          <Pressable style={styles.finalButton} onPress={() => setStep(3)}><Text style={styles.buttonText}>Guardar palabras clave</Text></Pressable>
+          <Pressable style={styles.finalButton} onPress={() => Create(text, true)}><Text style={styles.buttonText}>Guardar palabras clave</Text></Pressable>
           <Pressable style={styles.finalButton} onPress={() => setStep(1)}><Text style={styles.buttonText}>Editar otra imagen</Text></Pressable>
-        </View>
+        </View> 
       </View>}
     </View>
   );
