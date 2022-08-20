@@ -101,6 +101,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.dark.input,
         width: 165,
         color: Colors.dark.text,
+        paddingVertical: 7
     },
     btn: {
         marginVertical: 15,
