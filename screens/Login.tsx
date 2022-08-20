@@ -15,11 +15,6 @@ export default function Login(){
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    // const app = initializeApp(firebaseConfig);
-    // const auth = initializeAuth(app, {
-    //     persistence: getReactNativePersistence(AsyncStorage)
-    //});
-
     const handleSignIn = () => {
         setIsLoading(true);
         signInWithEmailAndPassword(auth, email, password)

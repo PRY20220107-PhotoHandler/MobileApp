@@ -19,13 +19,25 @@ import Home from '../screens/Home';
 import Settings from '../screens/Settings';
 import { RootStackParamList, RootTabParamList, RootTabScreenProps } from '../types';
 import LinkingConfiguration from './LinkingConfiguration';
+import Login from '../screens/Login';
+import { AuthenticationContextProvider, useActualContext } from '../services/authentication/authenticationContext';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
+  const user = useActualContext()
+  console.log(user);
+  
   return (
     <NavigationContainer
       linking={LinkingConfiguration}
       theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <RootNavigator />
+          <AuthenticationContextProvider>
+            {
+              useActualContext()?
+              <RootNavigator />
+              :
+              <Login />
+            }
+          </AuthenticationContextProvider>
     </NavigationContainer>
   );
 }
