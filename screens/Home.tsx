@@ -7,8 +7,9 @@ import { AntDesign } from '@expo/vector-icons';
 import axios from 'axios'; 
 import * as Linking from 'expo-linking';
 
+import {arrayUnion} from 'firebase/firestore';
 import { deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore';
-import {db} from '../core/config';
+import {db} from '../core/fb-config';
 
 export default function Home() {
   const [image, setImage] = useState("");
@@ -25,24 +26,34 @@ export default function Home() {
   // Firestore Database
   const myDoc = doc(db, "MyCollection", "MyDocument")
 
-  const Create = (value, merge:boolean) => {
+  const Create = (merge:boolean) => {
     // MARK: Creating New Doc in Firebase
     // Before that enable Firebase in Firebase Console
-    const myDoc = doc(db, "PalabrasClave", "UsuarioXX")
+    const myDoc = doc(db, "PalabrasClave", "Usuario01")
+    //const docRef = db2.collection('PalabrasClave').doc('UsuarioXX');
 
       getDoc(myDoc)
       // Handling Promises
         .then((snapshot) => {
           // MARK: Success
           console.log(snapshot.exists());
-          
+
+          //var db = firestore();
           if (snapshot.exists()) {
-            setKword(snapshot.data().words);
+            //setKword(snapshot.data().words);
+            setDoc(myDoc, {'words':arrayUnion(text)}, { merge: merge })
+            /*db2.doc('PalabrasClave/UsuarioXX').update({
+              'words': arrayUnion([text])
+            })*/
           } else {
-            setKword(text)
+            //setKword(text)
+            const docData = {
+              'words': [text]
+            }
+            setDoc(myDoc, docData)
           }
 
-          setText(kword+text);
+          /*setText(kword+text);
           const docData = {
             "words": text
           }
@@ -56,7 +67,7 @@ export default function Home() {
             .catch((error) => {
               // MARK: Failure
               alert(error.message)
-            })
+            })*/
         })
         
       
@@ -218,7 +229,7 @@ export default function Home() {
         <View style={styles.editButtonWrapper}>
           <Pressable style={styles.finalButton} onPress={() => shareImage()}><Text style={styles.buttonText}>Guardar imagen</Text></Pressable>
           <Pressable style={styles.finalButton} onPress={() => shareImage()}><Text style={styles.buttonText}>Compartir</Text></Pressable>
-          <Pressable style={styles.finalButton} onPress={() => Create(text, true)}><Text style={styles.buttonText}>Guardar palabras clave</Text></Pressable>
+          <Pressable style={styles.finalButton} onPress={() => Create(true)}><Text style={styles.buttonText}>Guardar palabras clave</Text></Pressable>
           <Pressable style={styles.finalButton} onPress={() => setStep(1)}><Text style={styles.buttonText}>Editar otra imagen</Text></Pressable>
         </View> 
       </View>}
