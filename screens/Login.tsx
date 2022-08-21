@@ -17,10 +17,10 @@ export default function Login({ navigation}: RootStackScreenProps<'Login'>){
         let msgs: Array<string>= [];
         let validEmail = /[a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*@[a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*[.][a-zA-Z]{2,5}/
 
-        if(email === "") msgs.push("No se ingresó el Email")
-        if(email.length > 0 && !validEmail.exec(email)) msgs.push("No se ingresó un correo válido")
-        if(password === "") msgs.push("No se ingresó la Contraseña")
-        if(password.length > 0 && password.length < 6) msgs.push("La contraseña tiene menos de 6 caractéres")
+        if(email === "") msgs.push("No se ingresó el Email.")
+        if(email.length > 0 && !validEmail.exec(email)) msgs.push("No se ingresó un correo válido.")
+        if(password === "") msgs.push("No se ingresó la Contraseña.")
+        if(password.length > 0 && password.length < 6) msgs.push("La contraseña tiene menos de 6 caractéres.")
 
         return msgs;
     }

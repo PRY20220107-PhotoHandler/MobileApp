@@ -15,7 +15,7 @@ import { onAuthStateChanged } from 'firebase/auth/react-native';
 import { auth } from '../core/fb-config';
 import { User } from 'firebase/auth';
 
-import { View } from '../components/Themed';
+import { View, Text } from '../components/Themed';
 import { FontAwesome } from '@expo/vector-icons';
 import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
@@ -29,6 +29,7 @@ import Home from '../screens/Home';
 import Settings from '../screens/Settings';
 import Login from '../screens/Login';
 import SignUp from '../screens/SignUp';
+import Logout from '../screens/Logout';
 
 
 const AuthenticatedUserContext = createContext({});
@@ -116,6 +117,11 @@ function BottomTabNavigator() {
       initialRouteName="Home"
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme].tint,
+        headerRight() {
+          return(
+            <Logout />
+          );
+        },
       }}>
       <BottomTab.Screen
         name="Profile"

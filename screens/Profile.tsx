@@ -1,4 +1,4 @@
-import { ActivityIndicator, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 import { Text, View } from '../components/Themed';
 
@@ -6,7 +6,6 @@ export default function Profile() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Perfil</Text>
-      <ActivityIndicator size='large' color='#fff' />
     </View>
   );
 }

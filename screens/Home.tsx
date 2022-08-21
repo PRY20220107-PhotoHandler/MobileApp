@@ -9,8 +9,7 @@ import * as Linking from 'expo-linking';
 
 import {arrayUnion} from 'firebase/firestore';
 import { deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore';
-import {db, auth} from '../core/fb-config';
-import { signOut } from 'firebase/auth';
+import { db } from '../core/fb-config';
 
 export default function Home() {
   const [image, setImage] = useState("");
@@ -26,10 +25,6 @@ export default function Home() {
 
   // Firestore Database
   const myDoc = doc(db, "MyCollection", "MyDocument")
-
-  const onSignOut = () => {
-    signOut(auth).catch(error => console.log(error));
-  }
 
   const Create = (merge:boolean) => {
     // MARK: Creating New Doc in Firebase
@@ -198,7 +193,6 @@ export default function Home() {
       </Modal>
       {step == 1 && <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <Pressable style={styles.button} onPress={pickImage}><Text style={styles.buttonText}>Subir Imagen</Text></Pressable>
-        <Pressable style={styles.button} onPress={onSignOut}><Text style={styles.buttonText}>Cerrar Sesión</Text></Pressable>
         {(image != "") && <View>
           <Text style={styles.imageText}>La imagen subida es la siguiente:</Text>
           <Image source={{ uri: image }} style={{ width: 200, height: 200, marginLeft:'auto', marginRight:'auto'}} />
