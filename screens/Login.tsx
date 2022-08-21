@@ -6,41 +6,40 @@ import Colors from '../constants/Colors';
 import { RootStackScreenProps } from '../types';
 
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import {auth} from '../core/fb-config';
+import { auth } from '../core/fb-config';
 
 export default function Login({ navigation}: RootStackScreenProps<'Login'>){
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    // const handleSignIn = () => {
-    //     setIsLoading(true);
-    //     signInWithEmailAndPassword(auth, email, password)
-    //     .then((userCredential) => {
-    //         console.log('Signed In!');
-    //         const user = userCredential.user;
-    //         console.log(user);
-    //     })
-    //     .catch(err => {
-    //         console.log(err);
-    //     }).finally(() => {
-    //         setIsLoading(false);
-    //     })
-    // }
+    const validateRules = (email:string, password:string) => {
+        let msgs: Array<string>= [];
+        let validEmail = /[a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*@[a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*[.][a-zA-Z]{2,5}/
 
+        if(email === "") msgs.push("No se ingresó el Email")
+        if(email.length > 0 && !validEmail.exec(email)) msgs.push("No se ingresó un correo válido")
+        if(password === "") msgs.push("No se ingresó la Contraseña")
+        if(password.length > 0 && password.length < 6) msgs.push("La contraseña tiene menos de 6 caractéres")
 
-    const onHandleLogIn = () => {
-        if(email !== "" && password !== ""){
-            signInWithEmailAndPassword(auth, email, password)
-            .then(() => console.log("Login success"))
-            .catch((err) => Alert.alert("Login error:", err.message));
-        }
+        return msgs;
     }
 
-
-    const goToRegister = () => {
-        console.log('Presionado');
-        Alert.alert('Ir a Registrar');
+    const onHandleLogIn = () => {
+        setIsLoading(true);
+        if(validateRules(email, password).length === 0){
+            signInWithEmailAndPassword(auth, email, password)
+            .then(() => {
+                console.log("Login success");
+            })
+            .catch((err) => {
+                setIsLoading(false);
+                Alert.alert("Login error:", err.message);
+            });
+        } else {
+            setIsLoading(false);
+            Alert.alert("Login error:", validateRules(email, password).join('\n'));
+        }
     }
 
     return(
@@ -52,13 +51,13 @@ export default function Login({ navigation}: RootStackScreenProps<'Login'>){
             <View style={styles.bg_icon}>
                 <Ionicons name="md-mail" size={20} color={Colors.dark.text}/>
             </View>
-            <TextInput onChangeText={(text) => setEmail(text)} placeholderTextColor={'#fff'} style={styles.input} placeholder='Email'/>
+            <TextInput onChangeText={(text) => setEmail(text.trim())} placeholderTextColor={'#fff'} style={styles.input} placeholder='Email'/>
         </View>
         <View style={styles.inputs}>
             <View style={styles.bg_icon}>
                 <Ionicons name="md-lock-closed" size={20} color={Colors.dark.text}/>
             </View>
-            <TextInput onChangeText={(text) => setPassword(text)} placeholderTextColor={'#fff'} style={styles.input} secureTextEntry={true} placeholder='Contraseña'/>
+            <TextInput onChangeText={(text) => setPassword(text.trim())} placeholderTextColor={'#fff'} style={styles.input} secureTextEntry={true} placeholder='Contraseña'/>
         </View>
 
         <TouchableHighlight onPress={onHandleLogIn} style={styles.btn} underlayColor={'#DEDEDE'}>

@@ -12,7 +12,8 @@ import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ActivityIndicator, ColorSchemeName, Pressable } from 'react-native';
 import { onAuthStateChanged } from 'firebase/auth/react-native';
-import {auth} from '../core/fb-config';
+import { auth } from '../core/fb-config';
+import { User } from 'firebase/auth';
 
 import { View } from '../components/Themed';
 import { FontAwesome } from '@expo/vector-icons';
@@ -28,7 +29,6 @@ import Home from '../screens/Home';
 import Settings from '../screens/Settings';
 import Login from '../screens/Login';
 import SignUp from '../screens/SignUp';
-import { User } from 'firebase/auth';
 
 
 const AuthenticatedUserContext = createContext({});
@@ -68,9 +68,7 @@ export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeNa
                 <AuthNavigator />
               }
       </NavigationContainer>
-  </AuthenticatedUserContext.Provider>
-
-
+    </AuthenticatedUserContext.Provider>
   );
 }
 
@@ -82,7 +80,10 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function AuthNavigator() {
   return(
-    <Stack.Navigator >
+    <Stack.Navigator screenOptions={{
+      gestureEnabled: true,
+
+    }}>
       <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
       <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} />
     </Stack.Navigator>

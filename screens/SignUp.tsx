@@ -6,7 +6,7 @@ import Colors from '../constants/Colors';
 import { RootStackScreenProps } from '../types';
 
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import {auth} from '../core/fb-config';
+import { auth } from '../core/fb-config';
 
 
 export default function SignUp({navigation}: RootStackScreenProps<'SignUp'>){
@@ -14,11 +14,32 @@ export default function SignUp({navigation}: RootStackScreenProps<'SignUp'>){
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
+    const validateRules = (email:string, password:string) => {
+        let msgs: Array<string>= [];
+        let validEmail = /[a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*@[a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*[.][a-zA-Z]{2,5}/
+
+        if(email === "") msgs.push("No se ingresó el Email")
+        if(email.length > 0 && !validEmail.exec(email)) msgs.push("No se ingresó un correo válido")
+        if(password === "") msgs.push("No se ingresó la Contraseña")
+        if(password.length > 0 && password.length < 6) msgs.push("La contraseña tiene menos de 6 caractéres")
+
+        return msgs;
+    }
+
     const onHandleSignUp = () => {
-        if(email !== "" && password !== ""){
+        setIsLoading(true);
+        if(validateRules(email, password).length === 0){
             createUserWithEmailAndPassword(auth, email, password)
-            .then(() => console.log("Login success"))
-            .catch((err) => Alert.alert("Login error:", err.message));
+            .then(() => {
+                console.log("SignUp success");
+            })
+            .catch((err) => {
+                setIsLoading(false);
+                Alert.alert("SignUp error:", err.message);
+            });
+        } else {
+            setIsLoading(false);
+            Alert.alert("SignUp error:", validateRules(email, password).join('\n'));
         }
     }
 
@@ -31,21 +52,21 @@ export default function SignUp({navigation}: RootStackScreenProps<'SignUp'>){
               <View style={styles.bg_icon}>
                   <Ionicons name="md-mail" size={20} color={Colors.dark.text}/>
               </View>
-              <TextInput onChangeText={(text) => setEmail(text)} placeholderTextColor={'#fff'} style={styles.input} placeholder='Email'/>
+              <TextInput onChangeText={(text) => setEmail(text.trim())} placeholderTextColor={'#fff'} style={styles.input} placeholder='Email'/>
           </View>
           <View style={styles.inputs}>
               <View style={styles.bg_icon}>
                   <Ionicons name="md-lock-closed" size={20} color={Colors.dark.text}/>
               </View>
-              <TextInput onChangeText={(text) => setPassword(text)} placeholderTextColor={'#fff'} style={styles.input} secureTextEntry={true} placeholder='Contraseña'/>
+              <TextInput onChangeText={(text) => setPassword(text.trim())} placeholderTextColor={'#fff'} style={styles.input} secureTextEntry={true} placeholder='Contraseña'/>
           </View>
   
           <TouchableHighlight onPress={onHandleSignUp} style={styles.btn} underlayColor={'#DEDEDE'}>
               {
                   isLoading?
-                  <ActivityIndicator size="small" color={Colors.light.text} ></ActivityIndicator>
+                  <ActivityIndicator size="small" color={Colors.light.text}></ActivityIndicator>
                   :
-                  <Text style={styles.btn_text}>Ingresar</Text>
+                  <Text style={styles.btn_text}>Crear</Text>
               }
           </TouchableHighlight>
           <TouchableWithoutFeedback onPress={() => navigation.navigate("Login")}>
