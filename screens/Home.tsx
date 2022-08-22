@@ -10,6 +10,8 @@ import * as Linking from 'expo-linking';
 import {arrayUnion} from 'firebase/firestore';
 import { deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../core/fb-config';
+import { useSelector, useDispatch } from 'react-redux';
+//import userReducer from '../redux/reducers';
 
 export default function Home() {
   const [image, setImage] = useState("");
@@ -21,15 +23,15 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const [kword, setKword] = useState("");
+  const diu = useSelector(state => state);
 
   // Firestore Database
-  const myDoc = doc(db, "MyCollection", "MyDocument")
+  //const myDoc = doc(db, "MyCollection", "MyDocument")
 
   const Create = (merge:boolean) => {
     // MARK: Creating New Doc in Firebase
     // Before that enable Firebase in Firebase Console
-    const myDoc = doc(db, "PalabrasClave", "Usuario01")
+    const myDoc = doc(db, "PalabrasClave", `${diu.diu}`)
     //const docRef = db2.collection('PalabrasClave').doc('UsuarioXX');
 
       getDoc(myDoc)
@@ -37,7 +39,7 @@ export default function Home() {
         .then((snapshot) => {
           // MARK: Success
           console.log(snapshot.exists());
-
+          //console.log(diu);
           //var db = firestore();
           if (snapshot.exists()) {
             //setKword(snapshot.data().words);

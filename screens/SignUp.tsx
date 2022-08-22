@@ -7,12 +7,21 @@ import { RootStackScreenProps } from '../types';
 
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../core/fb-config';
+import { deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore';
+import { db } from '../core/fb-config';
+import { useSelector, useDispatch } from 'react-redux';
+import { setDiu } from '../redux/actions';
 
 
 export default function SignUp({navigation}: RootStackScreenProps<'SignUp'>){
+
+    //const diu = useSelector(state=>state.userReducer);
+    const dispatch = useDispatch();
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    //const [diu, setDiu] = useState('');
 
     const validateRules = (email:string, password:string) => {
         let msgs: Array<string>= [];
@@ -30,8 +39,12 @@ export default function SignUp({navigation}: RootStackScreenProps<'SignUp'>){
         setIsLoading(true);
         if(validateRules(email, password).length === 0){
             createUserWithEmailAndPassword(auth, email, password)
-            .then(() => {
+            .then((cred) => {
                 console.log("SignUp success");
+                //const myDoc = doc(db, "PalabrasClave", cred.user.uid)
+                //setDoc(myDoc, {'words': []})
+                //setDiu(cred.user.uid)
+                dispatch(setDiu(cred.user.uid));
             })
             .catch((err) => {
                 setIsLoading(false);
@@ -75,7 +88,6 @@ export default function SignUp({navigation}: RootStackScreenProps<'SignUp'>){
         </View>
       );
 }
-
 
 const styles = StyleSheet.create({
     container: {

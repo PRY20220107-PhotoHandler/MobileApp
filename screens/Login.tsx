@@ -7,8 +7,14 @@ import { RootStackScreenProps } from '../types';
 
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../core/fb-config';
+import { useSelector, useDispatch } from 'react-redux';
+import { setDiu } from '../redux/actions';
 
 export default function Login({ navigation}: RootStackScreenProps<'Login'>){
+
+    //const diu = useSelector(state => state.userReducer);
+    const dispatch = useDispatch();
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -29,8 +35,10 @@ export default function Login({ navigation}: RootStackScreenProps<'Login'>){
         setIsLoading(true);
         if(validateRules(email, password).length === 0){
             signInWithEmailAndPassword(auth, email, password)
-            .then(() => {
+            .then((cred) => {
                 console.log("Login success");
+                //console.log(cred.user.uid);
+                dispatch(setDiu(cred.user.uid));
             })
             .catch((err) => {
                 setIsLoading(false);
