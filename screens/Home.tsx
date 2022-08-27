@@ -4,8 +4,14 @@ import { Text, View } from '../components/Themed';
 import { Modal, Pressable, Image, TextInput } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { AntDesign } from '@expo/vector-icons'; 
-import axios from "axios"; 
+import axios from 'axios'; 
 import * as Linking from 'expo-linking';
+
+import {arrayUnion} from 'firebase/firestore';
+import { deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore';
+import { db } from '../core/fb-config';
+import { useSelector, useDispatch } from 'react-redux';
+//import userReducer from '../redux/reducers';
 
 export default function Home() {
   const [image, setImage] = useState("");
@@ -16,6 +22,60 @@ export default function Home() {
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+
+  const diu = useSelector(state => state);
+
+  // Firestore Database
+  //const myDoc = doc(db, "MyCollection", "MyDocument")
+
+  const Create = (merge:boolean) => {
+    // MARK: Creating New Doc in Firebase
+    // Before that enable Firebase in Firebase Console
+    const myDoc = doc(db, "PalabrasClave", `${diu.diu}`)
+    //const docRef = db2.collection('PalabrasClave').doc('UsuarioXX');
+
+      getDoc(myDoc)
+      // Handling Promises
+        .then((snapshot) => {
+          // MARK: Success
+          console.log(snapshot.exists());
+          //console.log(diu);
+          //var db = firestore();
+          if (snapshot.exists()) {
+            //setKword(snapshot.data().words);
+            setDoc(myDoc, {'words':arrayUnion(text)}, { merge: merge })
+            /*db2.doc('PalabrasClave/UsuarioXX').update({
+              'words': arrayUnion([text])
+            })*/
+          } else {
+            //setKword(text)
+            const docData = {
+              'words': [text]
+            }
+            setDoc(myDoc, docData)
+          }
+
+          /*setText(kword+text);
+          const docData = {
+            "words": text
+          }
+          console.log(text)
+          setDoc(myDoc, docData)
+            // Handling Promises
+            .then(() => {
+              // MARK: Success
+              alert("Saved Succesfully!")
+            })
+            .catch((error) => {
+              // MARK: Failure
+              alert(error.message)
+            })*/
+        })
+        
+      
+      //var keywords:string  = value;
+      
+  };
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
@@ -185,9 +245,9 @@ export default function Home() {
         <View style={styles.editButtonWrapper}>
           <Pressable style={styles.finalButton} onPress={() => shareImage()}><Text style={styles.buttonText}>Guardar imagen</Text></Pressable>
           <Pressable style={styles.finalButton} onPress={() => shareImage()}><Text style={styles.buttonText}>Compartir</Text></Pressable>
-          <Pressable style={styles.finalButton} onPress={() => setStep(3)}><Text style={styles.buttonText}>Guardar palabras clave</Text></Pressable>
+          <Pressable style={styles.finalButton} onPress={() => Create(true)}><Text style={styles.buttonText}>Guardar palabras clave</Text></Pressable>
           <Pressable style={styles.finalButton} onPress={() => setStep(1)}><Text style={styles.buttonText}>Editar otra imagen</Text></Pressable>
-        </View>
+        </View> 
       </View>}
     </View>
   );

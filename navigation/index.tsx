@@ -3,30 +3,73 @@
  * https://reactnavigation.org/docs/getting-started
  *
  */
-import { FontAwesome } from '@expo/vector-icons';
+
+import * as React from 'react';
+import { useState, useEffect, createContext, useContext } from 'react';
+
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import * as React from 'react';
-import { ColorSchemeName, Pressable } from 'react-native';
+import { ActivityIndicator, ColorSchemeName, Pressable } from 'react-native';
+import { onAuthStateChanged } from 'firebase/auth/react-native';
+import { auth } from '../core/fb-config';
+import { User } from 'firebase/auth';
 
+import { View, Text } from '../components/Themed';
+import { FontAwesome } from '@expo/vector-icons';
 import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
+
+import { RootStackParamList, RootTabParamList, RootTabScreenProps } from '../types';
+import LinkingConfiguration from './LinkingConfiguration';
 import ModalScreen from '../screens/ModalScreen';
 import NotFoundScreen from '../screens/NotFoundScreen';
 import Profile from '../screens/Profile';
 import Home from '../screens/Home';
 import Settings from '../screens/Settings';
-import { RootStackParamList, RootTabParamList, RootTabScreenProps } from '../types';
-import LinkingConfiguration from './LinkingConfiguration';
+import Login from '../screens/Login';
+import SignUp from '../screens/SignUp';
+import Logout from '../screens/Logout';
+
+
+const AuthenticatedUserContext = createContext({});
+
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
+  const [user, setUser] = useState<User|null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth,
+      async athenticatedUser => {        
+        athenticatedUser ? setUser(athenticatedUser) : setUser(null);
+        setLoading(false);
+      }
+    );
+    return () => unsubscribe();
+  },[user]);
+
+  if(loading){
+    return(
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
   return (
-    <NavigationContainer
-      linking={LinkingConfiguration}
-      theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <RootNavigator />
-    </NavigationContainer>
+    <AuthenticatedUserContext.Provider value={{user, setUser}}>
+      <NavigationContainer
+        linking={LinkingConfiguration}
+        theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+              {
+                user?
+                <RootNavigator />
+                :
+                <AuthNavigator />
+              }
+      </NavigationContainer>
+    </AuthenticatedUserContext.Provider>
   );
 }
 
@@ -35,6 +78,18 @@ export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeNa
  * https://reactnavigation.org/docs/modal
  */
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
+function AuthNavigator() {
+  return(
+    <Stack.Navigator screenOptions={{
+      gestureEnabled: true,
+
+    }}>
+      <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
+      <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} />
+    </Stack.Navigator>
+  );
+}
 
 function RootNavigator() {
   return (
@@ -62,6 +117,11 @@ function BottomTabNavigator() {
       initialRouteName="Home"
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme].tint,
+        headerRight() {
+          return(
+            <Logout />
+          );
+        },
       }}>
       <BottomTab.Screen
         name="Profile"

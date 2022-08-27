@@ -25,4 +25,7 @@ const styles = StyleSheet.create({
     height: 1,
     width: '80%',
   },
+  white: {
+    color: '#fff'
+  }
 });
