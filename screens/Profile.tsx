@@ -24,7 +24,7 @@ export default function Profile() {
     getDoc(myDoc)
       .then((snapshot) => {
         if (snapshot.exists()) {
-          console.log(snapshot.data().words)
+          //console.log(snapshot.data().words)
           setUserDoc(snapshot.data().words)
         }
         else {
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f1f2f1",
     borderRadius: 10,
     padding: 10,
-    width: '100%',
+    width: 350,
     justifyContent: 'space-between',
   },
   deleteIcon: {
