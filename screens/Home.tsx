@@ -94,80 +94,53 @@ export default function Home() {
     Linking.openURL(edited);
   }; 
 
-  const ValidateResults = (get_url: string, result: any, is_validate: boolean) => {
-    if (result.status == "succeeded") {
-      if (is_validate) {
-        setModalVisible(false); setStep(2);
-      } else {
-        setModalVisible(false);
-        setOriginal(image);
-        setEdited(result.output[0].file);
-        setStep(3);
-      }
-    } else if (result.status == "failed") {
-      if (is_validate) {
+  const checkValidateResults = (results: any, error: boolean) => {
+    if (error == true) { setLoading(false); setMessage("Ha ocurrido un error"); } 
+    else {
+      if (JSON.parse(results).validated == "True") { 
+        setModalVisible(false); setStep(2); 
+      } else if (JSON.parse(results).validated == "False") { 
         setLoading(false); setMessage("Imagen invalida");
-      } else {
-        setLoading(false); setMessage("Ha ocurrido un error");
       }
-    } else {
-      GetResult(get_url, is_validate);
     }
   }
 
-  const GetResult = (get_url: string, is_validate: boolean) => {
-    var myHeaders = new Headers();
-    myHeaders.append("Authorization", "Token 4edbef7708ee3e9651803f6e79e6d121090aa463");
-    var requestOptions = { method: 'GET', headers: myHeaders, redirect: 'follow' };
-
-    fetch(get_url, requestOptions)
-      .then(response => response.text())
-      .then(result => ValidateResults(get_url, JSON.parse(result), is_validate))
-      .catch(error => console.log('error', error));
+  const checkEditResults = (results: any, error: boolean) => {
+    if (error == true) { setLoading(false); setMessage("Ha ocurrido un error"); } 
+    else {
+      setModalVisible(false);
+      setOriginal(JSON.parse(results).original);
+      setEdited(JSON.parse(results).generated);
+      setStep(3);
+    }
   }
 
-  const EditImage = (image_url: string, target_text: string, is_validate: boolean) => {
-    var myHeaders = new Headers();
-    myHeaders.append("Authorization", "Token 4edbef7708ee3e9651803f6e79e6d121090aa463");
-    myHeaders.append("Content-Type", "application/json");
-    var raw = JSON.stringify({
-      "version": "b6568e6bebca9b3f20e7efb6c710906efeb2d1ac6574a7a9d350fa51ee7daec4",
-      "input": {
-        "input": image_url,
-        "neutral": "a face",
-        "target": target_text,
-        "manipulation_strength": "4.1",
-        "disentanglement_threshold": "0.15"
-      }
-    });
-    var requestOptions = { method: 'POST', headers: myHeaders, body: raw, redirect: 'follow' };
-    fetch("https://api.replicate.com/v1/predictions", requestOptions)
-    .then(response => response.text())
-    .then(result => GetResult(JSON.parse(result).urls.get, is_validate))
-    .catch(error => console.log('error', error));
-  }
-
-  const validateImage = (target_text: string, is_validate: boolean) => {
+  const validateImage = async () => {
     if (image == "") {
       setModalVisible(true); setLoading(false);
       setMessage("Debe subir una imagen para poder validarla");
       return;
     }
-    setModalVisible(true); setLoading(true);
-    const fileName = image.split('/').pop();
+    /*const fileName = image.split('/').pop();
     const fileType = fileName.split('.').pop();
     var formdata = new FormData();
     formdata.append("image", {uri:image,name:fileName,type:`image/${fileType}`});
-    var requestOptions = {method: 'POST', body: formdata, redirect: 'follow' };
-    fetch("https://api.imgbb.com/1/upload?expiration=600&key=4581f1ac9b7e147c310527b051b60f14", requestOptions)
+    var requestOptions = { method: 'POST', body: formdata, redirect: 'follow' };
+    fetch("http://c29e-34-105-61-254.ngrok.io/validate", requestOptions)
       .then(response => response.text())
-      .then(result => EditImage(JSON.parse(result).data.url, target_text, is_validate))
-      .catch(error => console.log('error', error));
+      .then(result => checkValidateResults(result, false))
+      .catch(error => checkValidateResults(error, true));
+    setModalVisible(true);
+    setLoading(true);*/
+    console.log(image);
+    setStep(2)
   }
 
-  const initProcess = () => {
+  const initProcess = async() => {
     setStep(3);
-    if (text == "") {
+    setOriginal("https://www.clara.es/medio/2021/09/23/corte-de-pelo-hombre_b24e8652_1280x1927.jpg");
+    setEdited("https://www.clara.es/medio/2021/09/23/corte-de-pelo-hombre_b24e8652_1280x1927.jpg");
+    /*if (text == "") {
       setModalVisible(true); setLoading(false);
       setMessage("Debe ingresar un texto para poder realizar la edición");
       return;
@@ -185,10 +158,23 @@ export default function Home() {
       data: data,
     };
     axios.request(options).then(function (response) { 
-      validateImage(response.data.data.translations[0].translatedText, false);
+      editImage(response.data.data.translations[0].translatedText); 
     }).catch(function (error) {
-      setLoading(false); setMessage("Ha ocurrido un error");
-    });
+      checkEditResults(error, true)
+    });*/
+  }
+
+  const editImage = async(actualText: string) => {
+    const fileName = image.split('/').pop();
+    const fileType = fileName.split('.').pop();
+    var formdata = new FormData();
+    formdata.append("image", {uri:image,name:fileName,type:`image/${fileType}`});
+    formdata.append("text", actualText);
+    var requestOptions = { method: 'POST', body: formdata, redirect: 'follow' };
+    fetch("http://c29e-34-105-61-254.ngrok.io/edit", requestOptions)
+      .then(response => response.text())
+      .then(result => checkEditResults(result, false))
+      .catch(error => checkEditResults(error, true));
   }
 
   return (
@@ -214,7 +200,7 @@ export default function Home() {
           <Image source={{ uri: image }} style={{ width: 200, height: 200, marginLeft:'auto', marginRight:'auto'}} />
         </View>}
       </View>}
-      {step == 1 && <Pressable style={styles.validateButton} onPress={() => validateImage("a smiling face", true)}><Text style={styles.buttonText}>Validar imagen</Text></Pressable>}
+      {step == 1 && <Pressable style={styles.validateButton} onPress={() => validateImage()}><Text style={styles.buttonText}>Validar imagen</Text></Pressable>}
       {step == 2 && <View>
         <Text style={styles.inputLabel}>Ingrese las palabras clave por voz o texto:</Text>
         {/*<Pressable style={styles.recordButton}>
