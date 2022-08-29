@@ -1,4 +1,4 @@
-import { StyleSheet, FlatList, TouchableOpacity, TextInput, TouchableHighlight } from 'react-native';
+import { StyleSheet, FlatList, TouchableOpacity, TextInput, TouchableHighlight, Modal, Alert, ActivityIndicator } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import Colors from '../constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,8 +15,12 @@ import { getAuth, updateProfile, EmailAuthProvider, reauthenticateWithCredential
 export default function Profile() {
 
   const [userDoc, setUserDoc] = useState(null);
+  const [modal, setModal] = useState(true);
+  const [modalType, setModalType] = useState('email');
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState(''); 
+  const [loading, setLoading] = useState(false);
 
   const diu = useSelector(state => state);
 
@@ -37,17 +41,47 @@ export default function Profile() {
     reauthenticate(currentPassword).then((userCredential) => {
       updateEmail(userCredential.user, newEmail).then(() => {
         console.log("Email updated!");
+        setModal(false);
       }).catch((error) => { console.log(error); });
-    }).catch((error) => { console.log(error); });
+    }).catch((error) => {
+      console.log(error);
+      Alert.alert('Error', 'Probablemente se ingresó una contraseña incorrecta.');
+    }).then(()=> {
+      setLoading(false);
+    });
   }
 
   const changePassword = (currentPassword:string) => {
     reauthenticate(currentPassword).then((userCredential) => {
       updatePassword(userCredential.user, newPassword).then(() => {
         console.log("Password updated!");
+        setModal(false);
       }).catch((error) => { console.log(error); });
-    }).catch((error) => { console.log(error); });
+    }).catch((error) => {
+      console.log(error);
+      Alert.alert('Error', 'Probablemente se ingresó una contraseña incorrecta.');
+    }).then(()=> {
+      setLoading(false);
+    });
   }
+
+  const openModal = (type:string) => {
+    setModalType(type);
+    setModal(true);
+  }
+
+  const handleChangeProfile = () => {
+    setLoading(true);
+    if(confirmPassword.length < 6) {
+      Alert.alert('Contraseña Incorrecta', 'Ingresa una contraseña válida');
+      setLoading(false);
+      console.log('Ingresa una contraseña válida');
+    } else {
+      if(modalType === 'email') changeEmail(confirmPassword)
+      if(modalType === 'password') changePassword(confirmPassword)
+    }
+  }
+
 
   const Read = () => {
 
@@ -86,23 +120,58 @@ export default function Profile() {
 
   return (
     <View style={styles.container}>
+      <Modal transparent={true} visible={modal}>
+        <View style={{backgroundColor: '#000000aa', flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <View style={{backgroundColor: '#292929', justifyContent: 'center', alignItems: 'center', width: 300, paddingHorizontal: 30, paddingBottom:30, borderRadius: 10}}>
+            <View style={{width: 280, backgroundColor: 'transparent',alignItems: 'flex-end', marginVertical: 10}}>
+              <TouchableHighlight style={{backgroundColor: Colors.dark.background, borderRadius: 20, padding: 4}} onPress={() => setModal(false)}>
+                <Ionicons name="md-close" size={20} color={Colors.dark.text}/>
+              </TouchableHighlight>
+            </View>
+            <Text>Porfavor, ingresa tu contraseña actual para realizar el cambio: </Text>
+            <View style={styles.m_inputs}>
+              <View style={styles.m_bg_icon}>
+                  <Ionicons name="md-lock-closed" size={20} color={Colors.dark.text}/>
+              </View>
+              <TextInput onChangeText={(text) => setConfirmPassword(text.trim())} placeholderTextColor={'#fff'} style={styles.m_input} placeholder='Contraseña'/>
+            </View>
+            {
+              loading?
+              <ActivityIndicator size="small" color={Colors.dark.text}></ActivityIndicator>
+              :
+              <TouchableHighlight onPress={() => {handleChangeProfile()}}>
+                <Text style={styles.updateText}>Confirmar</Text>
+              </TouchableHighlight>
+            }
+          </View>
+        </View>
+      </Modal>
+
+
       <View style={styles.inputs}>
         <View style={styles.bg_icon}>
             <Ionicons name="md-mail" size={20} color={Colors.dark.text}/>
         </View>
         <TextInput onChangeText={(text) => setNewEmail(text.trim())} placeholderTextColor={'#fff'} style={styles.input} placeholder='Email'/>
-        <TouchableHighlight>
-          <Text style={styles.deleteIcon} onPress={() => changeEmail('admin123')}>Actualizar</Text>
-        </TouchableHighlight>
+        {
+          newEmail !=='' &&
+          <TouchableHighlight onPress={() => openModal('email')}>
+            <Text style={styles.updateText}>Actualizar</Text>
+          </TouchableHighlight>
+        }
+
       </View>
       <View style={styles.inputs}>
         <View style={styles.bg_icon}>
             <Ionicons name="md-lock-closed" size={20} color={Colors.dark.text}/>
         </View>
         <TextInput onChangeText={(text) => setNewPassword(text.trim())} placeholderTextColor={'#fff'} style={styles.input} placeholder='Contraseña'/>
-        <TouchableHighlight>
-          <Text style={styles.deleteIcon} onPress={() => changePassword('admin0123')}>Actualizar</Text>
-        </TouchableHighlight>
+        {
+          newPassword !=='' &&
+          <TouchableHighlight onPress={() => openModal('password')}>
+            <Text style={styles.updateText}>Actualizar</Text>
+          </TouchableHighlight>
+        }   
       </View>
 
       <View style={{width: '90%', flexDirection: 'row', marginTop: 40, marginBottom: 15}}>
@@ -146,7 +215,7 @@ const styles = StyleSheet.create({
     width: 350,
     justifyContent: 'space-between',
   },
-  deleteIcon: {
+  updateText: {
     color: Colors.dark.success,
   },
   title: {
@@ -155,9 +224,10 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     justifyContent: 'flex-start',
-    fontSize: 20,
+    fontSize: 19,
+    fontWeight: '400',
     marginBottom: 5,
-    color: '#fff'
+    color: '#C5C5C5'
   },
   separator: {
     marginVertical: 30,
@@ -185,8 +255,8 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   bg_icon: {
-      backgroundColor: Colors.dark.input,
-      paddingHorizontal: 10
+    backgroundColor: Colors.dark.input,
+    paddingHorizontal: 10
   },
   input: {
     backgroundColor: Colors.dark.input,
@@ -194,4 +264,23 @@ const styles = StyleSheet.create({
     color: Colors.dark.text,
     paddingVertical: 7
   },
+  m_inputs: {
+    marginVertical: 25,
+    paddingVertical: 13,
+    backgroundColor: Colors.dark.background,
+    width: 240,
+    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  m_bg_icon: {
+    backgroundColor: Colors.dark.background,
+    paddingHorizontal: 10
+  },
+  m_input: {
+    backgroundColor: Colors.dark.background,
+    width: 165,
+    color: Colors.dark.text,
+    paddingVertical: 7
+  }  
 });
