@@ -44,9 +44,8 @@ export default function Home() {
           if (snapshot.exists()) {
             //setKword(snapshot.data().words);
             setDoc(myDoc, {'words':arrayUnion(text)}, { merge: merge })
-            /*db2.doc('PalabrasClave/UsuarioXX').update({
-              'words': arrayUnion([text])
-            })*/
+            //setDoc(doc(db, "PalabrasClave", `${diu.diu}`), {'words':arrayUnion(text)}, { merge: merge })
+            
           } else {
             //setKword(text)
             const docData = {
