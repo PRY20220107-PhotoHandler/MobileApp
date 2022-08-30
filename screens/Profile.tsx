@@ -17,6 +17,7 @@ export default function Profile() {
   const [userDoc, setUserDoc] = useState(null);
   const [modal, setModal] = useState(false);
   const [modalType, setModalType] = useState('email');
+  const [newName, setNewName] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState(''); 
@@ -35,6 +36,22 @@ export default function Profile() {
     var cred = EmailAuthProvider.credential(
         user.email, currentPassword);
     return reauthenticateWithCredential(user, cred);
+  }
+
+  const changeUsername = (currentPassword:string) => {
+    reauthenticate(currentPassword).then((userCredential) => {
+      updateProfile(userCredential.user, {
+        displayName: newName
+      }).then(() => {
+        console.log("Name updated!");
+        setModal(false);
+      }).catch((error) => { console.log(error); });
+    }).catch((error) => {
+      console.log(error);
+      Alert.alert('Error', 'Probablemente se ingresó una contraseña incorrecta.');
+    }).then(()=> {
+      setLoading(false);
+    });
   }
 
   const changeEmail = (currentPassword:string) => {
@@ -91,6 +108,7 @@ export default function Profile() {
       setLoading(false);
       console.log('Ingresa una contraseña válida');
     } else {
+      if(modalType === 'name') changeUsername(confirmPassword)
       if(modalType === 'email') changeEmail(confirmPassword)
       if(modalType === 'password') changePassword(confirmPassword)
       if(modalType === 'delete') deleteAccount(confirmPassword)
@@ -167,6 +185,21 @@ export default function Profile() {
         </View>
       </Modal>
 
+      <View style={{width: '90%', flexDirection: 'row', marginTop: 30, marginBottom: 10}}>
+        <Text style={styles.subtitle}>Hola{auth.currentUser?.displayName && `, ${auth.currentUser?.displayName}`}!</Text>
+      </View>
+      <View style={styles.inputs}>
+        <View style={styles.bg_icon}>
+            <Ionicons name="md-person" size={20} color={Colors.dark.text}/>
+        </View>
+        <TextInput onChangeText={(text) => setNewName(text.trim())} placeholderTextColor={'#fff'} style={styles.input} placeholder='Nombre'/>
+        {
+          newName !=='' &&
+          <TouchableHighlight onPress={() => openModal('name')}>
+            <Text style={styles.updateText}>Actualizar</Text>
+          </TouchableHighlight>
+        }
+      </View>
 
       <View style={styles.inputs}>
         <View style={styles.bg_icon}>
@@ -179,7 +212,6 @@ export default function Profile() {
             <Text style={styles.updateText}>Actualizar</Text>
           </TouchableHighlight>
         }
-
       </View>
       <View style={styles.inputs}>
         <View style={styles.bg_icon}>
@@ -198,7 +230,7 @@ export default function Profile() {
         <Text style={styles.btn_text}>Eliminar cuenta</Text>
       </TouchableHighlight>
 
-      <View style={{width: '90%', flexDirection: 'row', marginTop: 40, marginBottom: 15}}>
+      <View style={{width: '90%', flexDirection: 'row', marginVertical: 15}}>
         <Text style={styles.subtitle}>Mis palabras clave</Text>
       </View>
       <FlatList
@@ -248,8 +280,8 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     justifyContent: 'flex-start',
-    fontSize: 19,
-    fontWeight: '400',
+    fontSize: 18,
+    fontWeight: '700',
     marginBottom: 5,
     color: '#C5C5C5'
   },
@@ -263,7 +295,7 @@ const styles = StyleSheet.create({
   },
   btn: {
     marginVertical: 15,
-    marginBottom: 60,
+    marginBottom: 30,
     backgroundColor: Colors.dark.error,
     width: 250,
     paddingVertical: 15,
@@ -275,10 +307,10 @@ const styles = StyleSheet.create({
     color: Colors.dark.text,
   },
   inputs: {
-    marginVertical: 15,
+    marginVertical: 13,
     backgroundColor: Colors.dark.input,
     width: 290,
-    paddingVertical: 13,
+    paddingVertical: 11,
     borderRadius: 20,
     flexDirection: 'row',
     alignItems: 'center'
