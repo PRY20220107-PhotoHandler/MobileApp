@@ -10,7 +10,7 @@ import { deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../core/fb-config';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { auth } from '../core/fb-config';
-import { getAuth, updateProfile, EmailAuthProvider, reauthenticateWithCredential, updateEmail, updatePassword, deleteUser} from 'firebase/auth/react-native';
+import { getAuth, updateProfile, EmailAuthProvider, reauthenticateWithCredential, updateEmail } from 'firebase/auth/react-native';
 
 export default function Profile() {
 
@@ -19,7 +19,6 @@ export default function Profile() {
   const [modalType, setModalType] = useState('email');
   const [newName, setNewName] = useState('');
   const [newEmail, setNewEmail] = useState('');
-  const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState(''); 
   const [loading, setLoading] = useState(false);
 
@@ -68,34 +67,6 @@ export default function Profile() {
     });
   }
 
-  const changePassword = (currentPassword:string) => {
-    reauthenticate(currentPassword).then((userCredential) => {
-      updatePassword(userCredential.user, newPassword).then(() => {
-        console.log("Password updated!");
-        setModal(false);
-      }).catch((error) => { console.log(error); });
-    }).catch((error) => {
-      console.log(error);
-      Alert.alert('Error', 'Probablemente se ingresó una contraseña incorrecta.');
-    }).then(()=> {
-      setLoading(false);
-    });
-  }
-
-  const deleteAccount = (currentPassword:string) => {
-    reauthenticate(currentPassword).then((userCredential) => {
-      deleteUser(userCredential.user).then(() => {
-        console.log("User deleted!");
-        setModal(false);
-      }).catch((error) => { console.log(error); });
-    }).catch((error) => {
-      console.log(error);
-      Alert.alert('Error', 'Probablemente se ingresó una contraseña incorrecta.');
-    }).then(()=> {
-      setLoading(false);
-    });
-  }
-
   const openModal = (type:string) => {
     setModalType(type);
     setModal(true);
@@ -110,8 +81,6 @@ export default function Profile() {
     } else {
       if(modalType === 'name') changeUsername(confirmPassword)
       if(modalType === 'email') changeEmail(confirmPassword)
-      if(modalType === 'password') changePassword(confirmPassword)
-      if(modalType === 'delete') deleteAccount(confirmPassword)
     }
   }
 
@@ -213,22 +182,6 @@ export default function Profile() {
           </TouchableHighlight>
         }
       </View>
-      <View style={styles.inputs}>
-        <View style={styles.bg_icon}>
-            <Ionicons name="md-lock-closed" size={20} color={Colors.dark.text}/>
-        </View>
-        <TextInput onChangeText={(text) => setNewPassword(text.trim())} placeholderTextColor={'#fff'} style={styles.input} placeholder='Contraseña'/>
-        {
-          newPassword !=='' &&
-          <TouchableHighlight onPress={() => openModal('password')}>
-            <Text style={styles.updateText}>Actualizar</Text>
-          </TouchableHighlight>
-        }   
-      </View>
-
-      <TouchableHighlight onPress={() => {openModal('delete')}} style={styles.btn} underlayColor={'#CE2222'}>
-        <Text style={styles.btn_text}>Eliminar cuenta</Text>
-      </TouchableHighlight>
 
       <View style={{width: '90%', flexDirection: 'row', marginVertical: 15}}>
         <Text style={styles.subtitle}>Mis palabras clave</Text>
@@ -248,13 +201,6 @@ export default function Profile() {
     </View>
   );
 }
-//<Pressable style={styles.button} onPress={() => Read()}></Pressable>
-
-/*
-<TouchableOpacity>
-              <Text style={styles.deleteIcon} onPress={() => DeleteItem(item.item, true)}>Delete</Text>
-            </TouchableOpacity>
-*/
 
 const styles = StyleSheet.create({
   container: {
@@ -285,22 +231,8 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     color: '#C5C5C5'
   },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-  },
   white: {
     color: '#fff'
-  },
-  btn: {
-    marginVertical: 15,
-    marginBottom: 30,
-    backgroundColor: Colors.dark.error,
-    width: 250,
-    paddingVertical: 15,
-    borderRadius: 20,
-    alignItems: 'center',
   },
   btn_text: {
     fontWeight: 'bold',
@@ -343,5 +275,5 @@ const styles = StyleSheet.create({
     width: 165,
     color: Colors.dark.text,
     paddingVertical: 7
-  }  
+  }
 });
