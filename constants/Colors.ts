@@ -1,6 +1,6 @@
 const tintColorLight = '#2f95dc';
 const tintColorDark = '#fff';
-const error = "#C01D1D";
+const error = "#CF2F2F";
 const success = "#1DC04B";
 
 export default {

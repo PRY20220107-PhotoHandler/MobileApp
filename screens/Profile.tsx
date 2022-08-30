@@ -10,12 +10,12 @@ import { deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../core/fb-config';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { auth } from '../core/fb-config';
-import { getAuth, updateProfile, EmailAuthProvider, reauthenticateWithCredential, updateEmail, updatePassword} from 'firebase/auth/react-native';
+import { getAuth, updateProfile, EmailAuthProvider, reauthenticateWithCredential, updateEmail, updatePassword, deleteUser} from 'firebase/auth/react-native';
 
 export default function Profile() {
 
   const [userDoc, setUserDoc] = useState(null);
-  const [modal, setModal] = useState(true);
+  const [modal, setModal] = useState(false);
   const [modalType, setModalType] = useState('email');
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -65,6 +65,20 @@ export default function Profile() {
     });
   }
 
+  const deleteAccount = (currentPassword:string) => {
+    reauthenticate(currentPassword).then((userCredential) => {
+      deleteUser(userCredential.user).then(() => {
+        console.log("User deleted!");
+        setModal(false);
+      }).catch((error) => { console.log(error); });
+    }).catch((error) => {
+      console.log(error);
+      Alert.alert('Error', 'Probablemente se ingresó una contraseña incorrecta.');
+    }).then(()=> {
+      setLoading(false);
+    });
+  }
+
   const openModal = (type:string) => {
     setModalType(type);
     setModal(true);
@@ -79,6 +93,7 @@ export default function Profile() {
     } else {
       if(modalType === 'email') changeEmail(confirmPassword)
       if(modalType === 'password') changePassword(confirmPassword)
+      if(modalType === 'delete') deleteAccount(confirmPassword)
     }
   }
 
@@ -128,7 +143,12 @@ export default function Profile() {
                 <Ionicons name="md-close" size={20} color={Colors.dark.text}/>
               </TouchableHighlight>
             </View>
-            <Text>Porfavor, ingresa tu contraseña actual para realizar el cambio: </Text>
+            {
+              modalType === 'delete'?
+              <Text>Porfavor, ingresa tu contraseña actual para eliminar la cuenta </Text>
+              :
+              <Text>Porfavor, ingresa tu contraseña actual para realizar el cambio: </Text>
+            }
             <View style={styles.m_inputs}>
               <View style={styles.m_bg_icon}>
                   <Ionicons name="md-lock-closed" size={20} color={Colors.dark.text}/>
@@ -173,6 +193,10 @@ export default function Profile() {
           </TouchableHighlight>
         }   
       </View>
+
+      <TouchableHighlight onPress={() => {openModal('delete')}} style={styles.btn} underlayColor={'#CE2222'}>
+        <Text style={styles.btn_text}>Eliminar cuenta</Text>
+      </TouchableHighlight>
 
       <View style={{width: '90%', flexDirection: 'row', marginTop: 40, marginBottom: 15}}>
         <Text style={styles.subtitle}>Mis palabras clave</Text>
@@ -237,13 +261,18 @@ const styles = StyleSheet.create({
   white: {
     color: '#fff'
   },
-  button: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    height: 42,
-    width: 168,
-    paddingTop: 10,
-    marginBottom: 22
+  btn: {
+    marginVertical: 15,
+    marginBottom: 60,
+    backgroundColor: Colors.dark.error,
+    width: 250,
+    paddingVertical: 15,
+    borderRadius: 20,
+    alignItems: 'center',
+  },
+  btn_text: {
+    fontWeight: 'bold',
+    color: Colors.dark.text,
   },
   inputs: {
     marginVertical: 15,
