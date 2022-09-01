@@ -36,6 +36,7 @@ export default function Settings() {
       setLoading(true);
       reauthenticate(confirmPassword).then((userCredential) => {
         updatePassword(userCredential.user, newPassword).then(() => {
+          Alert.alert("Listo", "La constraseña se actualizó correctamente.")
           console.log("Password updated!");
         }).catch((error) => { console.log(error); });
       }).catch((error) => {
