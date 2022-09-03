@@ -4,9 +4,8 @@ import { Text, View } from '../components/Themed';
 import { Modal, Pressable, Image, TextInput } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { AntDesign } from '@expo/vector-icons'; 
-import axios from 'axios'; 
 import * as Linking from 'expo-linking';
-
+import axios from "axios";
 import {arrayUnion} from 'firebase/firestore';
 import { deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../core/fb-config';
@@ -15,8 +14,8 @@ import { useSelector, useDispatch } from 'react-redux';
 
 export default function Home() {
   const [image, setImage] = useState("");
-  const [original, setOriginal] = useState("");
-  const [edited, setEdited] = useState("");
+  const [original, setOriginal] = useState("https://herrmans.eu/wp-content/uploads/2019/01/765-default-avatar.png");
+  const [edited, setEdited] = useState("https://herrmans.eu/wp-content/uploads/2019/01/765-default-avatar.png");
   const [step, setStep] = useState(1);
   const [text, setText] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
@@ -104,6 +103,7 @@ export default function Home() {
         setStep(3);
       }
     } else if (result.status == "failed") {
+      console.log(result);
       if (is_validate) {
         setLoading(false); setMessage("Imagen invalida");
       } else {
@@ -172,20 +172,19 @@ export default function Home() {
       return;
     }
     setModalVisible(true); setLoading(true);
-    const key = "4f8c6f07b5msh9ae37d4ed244e3cp1c0535jsn922b13f2d3cc"
-    const qs = obj => { return new URLSearchParams(obj).toString(); }
-    const data = qs({ q: text, source: "es", target: "en", })
     const options = {
-      method: "POST", url: "https://google-translate1.p.rapidapi.com/language/translate/v2",
+      method: 'GET',
+      url: 'https://google-translate20.p.rapidapi.com/translate',
+      params: {text: text, tl: 'en', sl: 'es'},
       headers: {
-        "content-type": "application/x-www-form-urlencoded", "x-rapidapi-key": key,
-        "x-rapidapi-host": "google-translate1.p.rapidapi.com",
-      },
-      data: data,
+        'X-RapidAPI-Key': '4f8c6f07b5msh9ae37d4ed244e3cp1c0535jsn922b13f2d3cc',
+        'X-RapidAPI-Host': 'google-translate20.p.rapidapi.com'
+      }
     };
-    axios.request(options).then(function (response) { 
-      validateImage(response.data.data.translations[0].translatedText, false);
+    axios.request(options).then(function (response) {
+      validateImage(response.data.data.translation, false);
     }).catch(function (error) {
+	    console.error(error);
       setLoading(false); setMessage("Ha ocurrido un error");
     });
   }
