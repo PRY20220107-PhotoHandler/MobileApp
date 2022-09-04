@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Alert } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { Text, View } from '../components/Themed';
 import { Modal, Pressable, Image, TextInput } from 'react-native';
@@ -26,12 +26,8 @@ export default function Home() {
 
   const diu = useSelector(state => state);
 
-  // Firestore Database
-  //const myDoc = doc(db, "MyCollection", "MyDocument")
-
   const Create = (merge:boolean) => {
     // MARK: Creating New Doc in Firebase
-    // Before that enable Firebase in Firebase Console
     const myDoc = doc(db, "PalabrasClave", `${diu.diu}`)
     //const docRef = db2.collection('PalabrasClave').doc('UsuarioXX');
 
@@ -45,14 +41,13 @@ export default function Home() {
           if (snapshot.exists()) {
             //setKword(snapshot.data().words);
             setDoc(myDoc, {'words':arrayUnion(text)}, { merge: merge })
-            //setDoc(doc(db, "PalabrasClave", `${diu.diu}`), {'words':arrayUnion(text)}, { merge: merge })
-            
+            Alert.alert("Guardado exitoso", "Se guardaron las palabras clave.")
           } else {
-            //setKword(text)
             const docData = {
               'words': [text]
             }
             setDoc(myDoc, docData)
+            Alert.alert("Guardado exitoso", "Se guardaron las palabras clave.")
           }
         })      
   };
