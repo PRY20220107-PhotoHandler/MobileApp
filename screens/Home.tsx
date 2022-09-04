@@ -12,6 +12,7 @@ import { db } from '../core/fb-config';
 import { useSelector, useDispatch } from 'react-redux';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import * as MediaLibrary from 'expo-media-library';
 //import userReducer from '../redux/reducers';
 
 export default function Home() {
@@ -86,6 +87,20 @@ export default function Home() {
       console.log(err);
     }
   }; 
+
+  const saveImage = async() => {
+    const permission = await MediaLibrary.requestPermissionsAsync();
+    const localuri = await FileSystem.downloadAsync(edited, FileSystem.documentDirectory + 'demo.jpg');
+
+    if(permission.status === "granted"){
+      MediaLibrary.saveToLibraryAsync(localuri.uri).then(()=>{
+        console.log("Se guardó correctamente");
+        Alert.alert("Listo", "Se guardó la imagen correctamente.");
+      }).catch(()=>{
+        Alert.alert("Error", "No se ha podido guardar la imagen.");
+      });
+    }
+  }
 
   const ValidateResults = (get_url: string, result: any, is_validate: boolean) => {
     if (result.status == "succeeded") {
@@ -236,7 +251,7 @@ export default function Home() {
             <Image source={{ uri: edited }} style={{ width: 200, height: 200, marginLeft:'auto', marginRight:'auto'}} />
           </View>
         <View style={styles.editButtonWrapper}>
-          <Pressable style={styles.finalButton} onPress={() => shareImage()}><Text style={styles.buttonText}>Guardar imagen</Text></Pressable>
+          <Pressable style={styles.finalButton} onPress={() => saveImage()}><Text style={styles.buttonText}>Guardar imagen</Text></Pressable>
           <Pressable style={styles.finalButton} onPress={() => shareImage()}><Text style={styles.buttonText}>Compartir</Text></Pressable>
           <Pressable style={styles.finalButton} onPress={() => Create(true)}><Text style={styles.buttonText}>Guardar palabras clave</Text></Pressable>
           <Pressable style={styles.finalButton} onPress={() => setStep(1)}><Text style={styles.buttonText}>Editar otra imagen</Text></Pressable>
