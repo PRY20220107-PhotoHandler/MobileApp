@@ -10,6 +10,8 @@ import {arrayUnion} from 'firebase/firestore';
 import { deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../core/fb-config';
 import { useSelector, useDispatch } from 'react-redux';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 //import userReducer from '../redux/reducers';
 
 export default function Home() {
@@ -52,27 +54,7 @@ export default function Home() {
             }
             setDoc(myDoc, docData)
           }
-
-          /*setText(kword+text);
-          const docData = {
-            "words": text
-          }
-          console.log(text)
-          setDoc(myDoc, docData)
-            // Handling Promises
-            .then(() => {
-              // MARK: Success
-              alert("Saved Succesfully!")
-            })
-            .catch((error) => {
-              // MARK: Failure
-              alert(error.message)
-            })*/
-        })
-        
-      
-      //var keywords:string  = value;
-      
+        })      
   };
 
   const pickImage = async () => {
@@ -88,8 +70,26 @@ export default function Home() {
     }
   };
 
-  const shareImage = () => {    
-    Linking.openURL(edited);
+  const shareImage = async () => {    
+    //Linking.openURL(edited);
+
+    //let imageb64;
+    // converting to base64
+    try {
+      const { uri } = await FileSystem.downloadAsync( //const { uri } = await 
+        edited,
+        FileSystem.documentDirectory + 'editedb64.jpg'
+      )
+      /*imageb64 = FileSystem.readAsStringAsync(uri, { // await
+        encoding: 'base64',
+      });*/
+      //console.log('prueba1','data:image/jpg;base64,'+imageb64);
+      Sharing.shareAsync(uri, {
+        dialogTitle: 'Compartiendo imagen editada',
+      });
+    } catch (err) {
+      console.log(err);
+    }
   }; 
 
   const ValidateResults = (get_url: string, result: any, is_validate: boolean) => {
