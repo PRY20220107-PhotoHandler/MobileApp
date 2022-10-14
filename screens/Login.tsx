@@ -37,8 +37,11 @@ export default function Login({ navigation}: RootStackScreenProps<'Login'>){
             signInWithEmailAndPassword(auth, email, password)
             .then((cred) => {
                 console.log("Login success");
-                //console.log(cred.user.uid);
-                dispatch(setDiu(cred.user.uid));
+                console.log(cred.user.uid);
+                dispatch({
+                    type: "SET_DIU",
+                    payload: cred.user.uid,
+                });
             })
             .catch((err) => {
                 setIsLoading(false);

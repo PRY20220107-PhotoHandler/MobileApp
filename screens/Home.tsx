@@ -1,22 +1,24 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Alert } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { Text, View } from '../components/Themed';
 import { Modal, Pressable, Image, TextInput } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { AntDesign } from '@expo/vector-icons'; 
-import axios from 'axios'; 
 import * as Linking from 'expo-linking';
-
+import axios from "axios";
 import {arrayUnion} from 'firebase/firestore';
 import { deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../core/fb-config';
 import { useSelector, useDispatch } from 'react-redux';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import * as MediaLibrary from 'expo-media-library';
 //import userReducer from '../redux/reducers';
 
 export default function Home() {
   const [image, setImage] = useState("");
-  const [original, setOriginal] = useState("");
-  const [edited, setEdited] = useState("");
+  const [original, setOriginal] = useState("https://herrmans.eu/wp-content/uploads/2019/01/765-default-avatar.png");
+  const [edited, setEdited] = useState("https://herrmans.eu/wp-content/uploads/2019/01/765-default-avatar.png");
   const [step, setStep] = useState(1);
   const [text, setText] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
@@ -25,12 +27,8 @@ export default function Home() {
 
   const diu = useSelector(state => state);
 
-  // Firestore Database
-  //const myDoc = doc(db, "MyCollection", "MyDocument")
-
   const Create = (merge:boolean) => {
     // MARK: Creating New Doc in Firebase
-    // Before that enable Firebase in Firebase Console
     const myDoc = doc(db, "PalabrasClave", `${diu.diu}`)
     //const docRef = db2.collection('PalabrasClave').doc('UsuarioXX');
 
@@ -44,37 +42,15 @@ export default function Home() {
           if (snapshot.exists()) {
             //setKword(snapshot.data().words);
             setDoc(myDoc, {'words':arrayUnion(text)}, { merge: merge })
-            /*db2.doc('PalabrasClave/UsuarioXX').update({
-              'words': arrayUnion([text])
-            })*/
+            Alert.alert("Guardado exitoso", "Se guardaron las palabras clave.")
           } else {
-            //setKword(text)
             const docData = {
               'words': [text]
             }
             setDoc(myDoc, docData)
+            Alert.alert("Guardado exitoso", "Se guardaron las palabras clave.")
           }
-
-          /*setText(kword+text);
-          const docData = {
-            "words": text
-          }
-          console.log(text)
-          setDoc(myDoc, docData)
-            // Handling Promises
-            .then(() => {
-              // MARK: Success
-              alert("Saved Succesfully!")
-            })
-            .catch((error) => {
-              // MARK: Failure
-              alert(error.message)
-            })*/
-        })
-        
-      
-      //var keywords:string  = value;
-      
+        })      
   };
 
   const pickImage = async () => {
@@ -90,9 +66,41 @@ export default function Home() {
     }
   };
 
-  const shareImage = () => {    
-    Linking.openURL(edited);
+  const shareImage = async () => {    
+    //Linking.openURL(edited);
+
+    //let imageb64;
+    // converting to base64
+    try {
+      const { uri } = await FileSystem.downloadAsync( //const { uri } = await 
+        edited,
+        FileSystem.documentDirectory + 'editedb64.jpg'
+      )
+      /*imageb64 = FileSystem.readAsStringAsync(uri, { // await
+        encoding: 'base64',
+      });*/
+      //console.log('prueba1','data:image/jpg;base64,'+imageb64);
+      Sharing.shareAsync(uri, {
+        dialogTitle: 'Compartiendo imagen editada',
+      });
+    } catch (err) {
+      console.log(err);
+    }
   }; 
+
+  const saveImage = async() => {
+    const permission = await MediaLibrary.requestPermissionsAsync();
+    const localuri = await FileSystem.downloadAsync(edited, FileSystem.documentDirectory + 'demo.jpg');
+
+    if(permission.status === "granted"){
+      MediaLibrary.saveToLibraryAsync(localuri.uri).then(()=>{
+        console.log("Se guardó correctamente");
+        Alert.alert("Listo", "Se guardó la imagen correctamente.");
+      }).catch(()=>{
+        Alert.alert("Error", "No se ha podido guardar la imagen.");
+      });
+    }
+  }
 
   const ValidateResults = (get_url: string, result: any, is_validate: boolean) => {
     if (result.status == "succeeded") {
@@ -105,6 +113,7 @@ export default function Home() {
         setStep(3);
       }
     } else if (result.status == "failed") {
+      console.log(result);
       if (is_validate) {
         setLoading(false); setMessage("Imagen invalida");
       } else {
@@ -173,20 +182,20 @@ export default function Home() {
       return;
     }
     setModalVisible(true); setLoading(true);
-    const key = "4f8c6f07b5msh9ae37d4ed244e3cp1c0535jsn922b13f2d3cc"
-    const qs = obj => { return new URLSearchParams(obj).toString(); }
-    const data = qs({ q: text, source: "es", target: "en", })
     const options = {
-      method: "POST", url: "https://google-translate1.p.rapidapi.com/language/translate/v2",
+      method: 'POST',
+      url: 'https://ai-translate.p.rapidapi.com/translates',
       headers: {
-        "content-type": "application/x-www-form-urlencoded", "x-rapidapi-key": key,
-        "x-rapidapi-host": "google-translate1.p.rapidapi.com",
+        'content-type': 'application/json',
+        'X-RapidAPI-Key': '4f8c6f07b5msh9ae37d4ed244e3cp1c0535jsn922b13f2d3cc',
+        'X-RapidAPI-Host': 'ai-translate.p.rapidapi.com'
       },
-      data: data,
+      data: '{"texts":["' + text + '"],"tls":["en"],"sl":"es"}'
     };
-    axios.request(options).then(function (response) { 
-      validateImage(response.data.data.translations[0].translatedText, false);
+    axios.request(options).then(function (response) {
+      validateImage(response.data[0].texts, false);
     }).catch(function (error) {
+	    console.error(error);
       setLoading(false); setMessage("Ha ocurrido un error");
     });
   }
@@ -243,7 +252,7 @@ export default function Home() {
             <Image source={{ uri: edited }} style={{ width: 200, height: 200, marginLeft:'auto', marginRight:'auto'}} />
           </View>
         <View style={styles.editButtonWrapper}>
-          <Pressable style={styles.finalButton} onPress={() => shareImage()}><Text style={styles.buttonText}>Guardar imagen</Text></Pressable>
+          <Pressable style={styles.finalButton} onPress={() => saveImage()}><Text style={styles.buttonText}>Guardar imagen</Text></Pressable>
           <Pressable style={styles.finalButton} onPress={() => shareImage()}><Text style={styles.buttonText}>Compartir</Text></Pressable>
           <Pressable style={styles.finalButton} onPress={() => Create(true)}><Text style={styles.buttonText}>Guardar palabras clave</Text></Pressable>
           <Pressable style={styles.finalButton} onPress={() => setStep(1)}><Text style={styles.buttonText}>Editar otra imagen</Text></Pressable>

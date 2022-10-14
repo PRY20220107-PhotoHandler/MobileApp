@@ -3,7 +3,7 @@ import * as fb from "firebase/app";
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from'firebase/firestore';
 import { initializeAuth, getReactNativePersistence, getAuth } from 'firebase/auth/react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+//import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -36,7 +36,8 @@ if(fb.getApps.length === 0){
 
 export const db = getFirestore(app);
 
-const auth = getAuth(app, {persistence: getReactNativePersistence(AsyncStorage)});
+//const auth = getAuth(app, {persistence: getReactNativePersistence(AsyncStorage)});
+const auth = getAuth(app);
 export { auth };
 
 
