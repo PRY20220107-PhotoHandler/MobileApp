@@ -43,6 +43,7 @@ export default function Profile() {
         displayName: newName
       }).then(() => {
         console.log("Name updated!");
+        Alert.alert('Listo', 'Se actualizaron los datos correctamente.');
         setModal(false);
       }).catch((error) => { console.log(error); });
     }).catch((error) => {
@@ -57,6 +58,7 @@ export default function Profile() {
     reauthenticate(currentPassword).then((userCredential) => {
       updateEmail(userCredential.user, newEmail).then(() => {
         console.log("Email updated!");
+        Alert.alert('Listo', 'Se actualizaron los datos correctamente.');
         setModal(false);
       }).catch((error) => { console.log(error); });
     }).catch((error) => {
@@ -140,7 +142,7 @@ export default function Profile() {
               <View style={styles.m_bg_icon}>
                   <Ionicons name="md-lock-closed" size={20} color={Colors.dark.text}/>
               </View>
-              <TextInput onChangeText={(text) => setConfirmPassword(text.trim())} placeholderTextColor={'#fff'} style={styles.m_input} placeholder='Contraseña'/>
+              <TextInput onChangeText={(text) => setConfirmPassword(text.trim())} secureTextEntry={true} placeholderTextColor={'#fff'} style={styles.m_input} placeholder='Contraseña'/>
             </View>
             {
               loading?
