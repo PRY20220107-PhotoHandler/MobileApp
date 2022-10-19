@@ -135,7 +135,11 @@ export default function Home() {
       .catch(error => console.log('error', error));
   }
 
-  const EditImage = (image_url: string, target_text: string, is_validate: boolean) => {
+  const EditImage = (image_url: string, target_text: string, is_validate: boolean, text_category: string) => {
+    let alpha = "4.1"; let beta = "0.15";
+    if (text_category == "specific") { alpha = "3.3"; beta = "0.21"; }
+    else if (text_category == "medium") { alpha = "4.1"; beta = "0.19"; }
+    else if (text_category == "entangled") { alpha = "6.7"; beta = "0.11"; }
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Token 4edbef7708ee3e9651803f6e79e6d121090aa463");
     myHeaders.append("Content-Type", "application/json");
@@ -145,8 +149,8 @@ export default function Home() {
         "input": image_url,
         "neutral": "a face",
         "target": target_text,
-        "manipulation_strength": "4.1",
-        "disentanglement_threshold": "0.15"
+        "manipulation_strength": alpha,
+        "disentanglement_threshold": beta
       }
     });
     var requestOptions = { method: 'POST', headers: myHeaders, body: raw, redirect: 'follow' };
@@ -154,6 +158,21 @@ export default function Home() {
     .then(response => response.text())
     .then(result => GetResult(JSON.parse(result).urls.get, is_validate))
     .catch(error => console.log('error', error));
+  }
+
+  const getParameters = (image_url: string, target_text: string, is_validate: boolean) => {
+    if (is_validate) {
+      EditImage(image_url, target_text, is_validate, "medium");
+    } else {
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    var raw = JSON.stringify({ "text": target_text });
+    var requestOptions = { method: 'POST', headers: myHeaders, body: raw, redirect: 'follow' };
+    fetch("https://nlp-classifier-2z3kv2lzwq-rj.a.run.app/classifier", requestOptions)
+        .then(response => response.text())
+        .then(result => EditImage(image_url, target_text, is_validate, JSON.parse(result).category))
+        .catch(error => console.log('error', error));
+    }
   }
 
   const validateImage = (target_text: string, is_validate: boolean) => {
@@ -170,7 +189,7 @@ export default function Home() {
     var requestOptions = {method: 'POST', body: formdata, redirect: 'follow' };
     fetch("https://api.imgbb.com/1/upload?expiration=600&key=4581f1ac9b7e147c310527b051b60f14", requestOptions)
       .then(response => response.text())
-      .then(result => EditImage(JSON.parse(result).data.url, target_text, is_validate))
+      .then(result => getParameters(JSON.parse(result).data.url, target_text, is_validate))
       .catch(error => console.log('error', error));
   }
 
