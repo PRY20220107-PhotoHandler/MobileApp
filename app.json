@@ -19,14 +19,24 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "The app accesses your photos to let you share them with your friends.",
+        "NSPhotoLibraryAddUsageDescription": "Allow the app to save your photos."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#151515"
       },
-      "package": "com.rnphotohandlerapp.myapp"
+      "package": "com.rnphotohandlerapp.myapp",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_MEDIA_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
@@ -41,11 +51,16 @@
       [
         "expo-media-library",
         {
-          "photosPermission":"The app accesses your photos to let you share them with your friends.",
+          "photosPermission": "The app accesses your photos to let you share them with your friends.",
           "savePhotosPermission": "Allow the app to save your photos.",
           "isAccessMediaLocationEnabled": "true"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "0f2a45a4-3cc2-44c3-bda3-bdfd9b35807b"
+      }
+    }
   }
 }

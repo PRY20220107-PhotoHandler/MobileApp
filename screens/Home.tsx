@@ -109,7 +109,7 @@ export default function Home() {
       } else {
         setModalVisible(false);
         setOriginal(image);
-        setEdited(result.output[0].file);
+        setEdited(result.output);
         setStep(3);
       }
     } else if (result.status == "failed") {
@@ -144,7 +144,7 @@ export default function Home() {
     myHeaders.append("Authorization", "Token 4edbef7708ee3e9651803f6e79e6d121090aa463");
     myHeaders.append("Content-Type", "application/json");
     var raw = JSON.stringify({
-      "version": "b6568e6bebca9b3f20e7efb6c710906efeb2d1ac6574a7a9d350fa51ee7daec4",
+      "version": "7af9a66f36f97fee2fece7dcc927551a951f0022cbdd23747b9212f23fc17021",
       "input": {
         "input": image_url,
         "neutral": "a face",
