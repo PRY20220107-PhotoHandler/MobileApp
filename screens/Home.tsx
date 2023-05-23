@@ -35,10 +35,6 @@ export default function Home() {
       getDoc(myDoc)
       // Handling Promises
         .then((snapshot) => {
-          // MARK: Success
-          console.log(snapshot.exists());
-          //console.log(diu);
-          //var db = firestore();
           if (snapshot.exists()) {
             //setKword(snapshot.data().words);
             setDoc(myDoc, {'words':arrayUnion(text)}, { merge: merge })
@@ -61,8 +57,8 @@ export default function Home() {
       aspect: [4, 3],
       quality: 1,
     });
-    if (!result.cancelled) {
-      setImage(result.uri);
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
     }
   };
 
@@ -76,10 +72,6 @@ export default function Home() {
         edited,
         FileSystem.documentDirectory + 'editedb64.jpg'
       )
-      /*imageb64 = FileSystem.readAsStringAsync(uri, { // await
-        encoding: 'base64',
-      });*/
-      //console.log('prueba1','data:image/jpg;base64,'+imageb64);
       Sharing.shareAsync(uri, {
         dialogTitle: 'Compartiendo imagen editada',
       });
@@ -94,7 +86,6 @@ export default function Home() {
 
     if(permission.status === "granted"){
       MediaLibrary.saveToLibraryAsync(localuri.uri).then(()=>{
-        console.log("Se guardó correctamente");
         Alert.alert("Listo", "Se guardó la imagen correctamente.");
       }).catch(()=>{
         Alert.alert("Error", "No se ha podido guardar la imagen.");
@@ -128,7 +119,6 @@ export default function Home() {
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Token 4edbef7708ee3e9651803f6e79e6d121090aa463");
     var requestOptions = { method: 'GET', headers: myHeaders, redirect: 'follow' };
-
     fetch(get_url, requestOptions)
       .then(response => response.text())
       .then(result => ValidateResults(get_url, JSON.parse(result), is_validate))
@@ -136,10 +126,10 @@ export default function Home() {
   }
 
   const EditImage = (image_url: string, target_text: string, is_validate: boolean, text_category: string) => {
-    let alpha = "4.1"; let beta = "0.15";
-    if (text_category == "specific") { alpha = "3.3"; beta = "0.21"; }
-    else if (text_category == "medium") { alpha = "4.1"; beta = "0.19"; }
-    else if (text_category == "entangled") { alpha = "6.7"; beta = "0.11"; }
+    let alpha = 5.56; let beta = 0.08;
+    /*if (text_category == "specific") { alpha = 3.3; beta = 0.21; }
+    else if (text_category == "medium") { alpha = 4.1; beta = 0.19; }
+    else if (text_category == "entangled") { alpha = 6.7; beta = 0.11; }*/
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Token 4edbef7708ee3e9651803f6e79e6d121090aa463");
     myHeaders.append("Content-Type", "application/json");
@@ -187,6 +177,7 @@ export default function Home() {
     var formdata = new FormData();
     formdata.append("image", {uri:image,name:fileName,type:`image/${fileType}`});
     var requestOptions = {method: 'POST', body: formdata, redirect: 'follow' };
+    console.log("jsjsj");
     fetch("https://api.imgbb.com/1/upload?expiration=600&key=4581f1ac9b7e147c310527b051b60f14", requestOptions)
       .then(response => response.text())
       .then(result => getParameters(JSON.parse(result).data.url, target_text, is_validate))
